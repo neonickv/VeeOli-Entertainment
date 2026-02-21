@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VeeOli Entertainment - Find Your People, Share Your Passion</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 0;
+            background: linear-gradient(135deg, #fff5f0 0%, #f0e6ff 50%, #fff0f5 100%);
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 70px;
+        }
+        .page { display: none; max-width: 500px; margin: 0 auto; padding: 15px 15px 80px 15px; }
+        .page.active { display: block; }
+        .btn {
+            display: block; width: 100%; padding: 16px; background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+            margin: 15px 0; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6A4C93 0%, #8B6DB8 100%);
+            box-shadow: 0 4px 12px rgba(106, 76, 147, 0.3);
+        }
+        .btn-secondary:hover { box-shadow: 0 6px 16px rgba(106, 76, 147, 0.4); }
+        .btn-small {
+            padding: 8px 16px; font-size: 14px; margin: 5px; width: auto;
+            display: inline-block;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95); padding: 16px;
+            border-radius: 12px; margin: 12px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .input, textarea {
+            width: 100%; padding: 16px; border: 2px solid #e2e8f0;
+            border-radius: 12px; font-size: 16px; box-sizing: border-box;
+            background: white; font-family: inherit;
+        }
+        .input:focus, textarea:focus { outline: none; border-color: #FF6B35; }
+        textarea { font-size: 14px; resize: none; }
+        h1 { font-size: 36px; text-align: center; color: #6A4C93; margin: 8px 0; font-weight: 800; }
+        h2 { font-size: 24px; color: #6A4C93; margin: 8px 0; font-weight: 700; }
+        h3 { font-size: 18px; color: #6A4C93; margin: 5px 0; font-weight: 600; }
+        p { color: #64748b; line-height: 1.5; font-size: 14px; margin: 8px 0; }
+        .center { text-align: center; }
+        .tagline {
+            font-size: 20px; font-weight: 600;
+            background: linear-gradient(135deg, #FF6B35 0%, #6A4C93 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; text-align: center; margin: 10px 0 30px 0;
+        }
+        .selected-count {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+            color: white; padding: 8px 16px; border-radius: 20px;
+            font-size: 13px; display: inline-block; margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+        }
+        .section-header {
+            font-size: 13px; font-weight: bold; color: #FF6B35;
+            text-transform: uppercase; margin: 20px 0 10px 0;
+            padding-top: 10px; border-top: 2px solid #FFE5DC;
+        }
+        .section-header:first-of-type { border-top: none; padding-top: 0; }
+        .group-card {
+            background: white; border-radius: 12px; padding: 16px;
+            margin: 12px 0; cursor: pointer; border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        .group-card:hover {
+            border-color: #FF6B35; transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+        }
+        .badge {
+            display: inline-block; padding: 4px 12px; background: #FFE5DC;
+            color: #FF6B35; border-radius: 12px; font-size: 12px;
+            font-weight: 600; margin: 4px;
+        }
+        .message {
+            padding: 12px 16px; border-radius: 18px; margin: 10px 0; max-width: 80%;
+        }
+        .message.sent {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+            color: white; margin-left: auto; border-bottom-right-radius: 4px;
+        }
+        .message.received {
+            background: white; color: #334155; margin-right: auto;
+            border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 2px solid #e2e8f0;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; padding: 5px 15px; transition: all 0.3s;
+        }
+        .nav-item:hover { transform: translateY(-2px); }
+        .nav-item.active { color: #FF6B35; }
+        .post-card {
+            background: white; border-radius: 12px; padding: 16px;
+            margin: 12px 0; border: 1px solid #e2e8f0;
+        }
+        .like-btn {
+            background: none; border: none; cursor: pointer;
+            font-size: 18px; padding: 5px 10px; transition: all 0.3s;
+        }
+        .like-btn:hover { transform: scale(1.2); }
+        .like-btn.liked { color: #FF6B35; }
+        .logo-collage {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px; width: 120px; height: 120px; margin: 0 auto 20px;
+            background: white; border-radius: 20px; padding: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .logo-item {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; background: linear-gradient(135deg, #FFE5DC 0%, #E6D5FF 100%);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Landing -->
+<div class="page active" id="landing">
+    <div class="logo-collage" style="margin-top: 40px;">
+        <div class="logo-item">🏈</div>
+        <div class="logo-item">🎮</div>
+        <div class="logo-item">🎬</div>
+        <div class="logo-item">⚽</div>
+        <div class="logo-item">🍳</div>
+        <div class="logo-item">🎵</div>
+        <div class="logo-item">🏍️</div>
+        <div class="logo-item">📷</div>
+        <div class="logo-item">⛳</div>
+    </div>
+    <h1>VeeOli Entertainment</h1>
+    <p class="tagline">Find your people, share your passion</p>
+    
+    <div class="card">
+        <h3 style="color: #FF6B35; margin-bottom: 10px;">🎮 Connect Through Interests</h3>
+        <p>Join groups, chat with enthusiasts, and dive deep into what you love—from sports to gaming, cooking to motorcycles.</p>
+    </div>
+    
+    <div class="card">
+        <h3 style="color: #6A4C93; margin-bottom: 10px;">👥 Create Your Community</h3>
+        <p>Start your own group, build a community around your passion, and meet people who get it.</p>
+    </div>
+    
+    <div class="card">
+        <h3 style="color: #FF6B35; margin-bottom: 10px;">💬 Chat & Share</h3>
+        <p>Connect 1-on-1 or join group conversations. Share tips, stories, and experiences with your tribe.</p>
+    </div>
+    
+    <button class="btn" onclick="show('signup')">Get Started</button>
+    <button class="btn btn-secondary" onclick="show('home')">Browse as Guest</button>
+</div>
+
+<!-- Sign Up -->
+<div class="page" id="signup">
+    <h2>Welcome! 👋</h2>
+    <p>Let's get you set up</p>
+    <input type="text" class="input" id="nameInput" placeholder="Choose your username" style="margin-top: 30px;">
+    <p style="font-size: 13px; color: #94a3b8; margin-top: 10px;">Pick a fun username - this is how others will know you!</p>
+    <button class="btn" id="nameBtn" disabled onclick="saveName()">Continue</button>
+</div>
+
+<!-- Interests -->
+<div class="page" id="interests">
+    <h2>What are you into?</h2>
+    <p>Select up to 10 interests (tap to select)</p>
+    <div class="center"><span class="selected-count" id="count">0 / 10 selected</span></div>
+    <div id="selectedInterests"></div>
+    
+    <div class="section-header">🏈 Sports</div>
+    <div class="card" onclick="toggleInterest(this, 'Football', '🏈')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🏈</span> <strong>Football</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Basketball', '🏀')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🏀</span> <strong>Basketball</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Baseball', '⚾')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">⚾</span> <strong>Baseball</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Golf', '⛳')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">⛳</span> <strong>Golf</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Soccer', '⚽')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">⚽</span> <strong>Soccer</strong></div>
+    
+    <div class="section-header">🎮 Gaming</div>
+    <div class="card" onclick="toggleInterest(this, 'Video Games', '🎮')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🎮</span> <strong>Video Games</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Board Games', '🎲')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🎲</span> <strong>Board Games</strong></div>
+    
+    <div class="section-header">🍳 Hobbies</div>
+    <div class="card" onclick="toggleInterest(this, 'Cooking', '🍳')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🍳</span> <strong>Cooking</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Motorcycles', '🏍️')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🏍️</span> <strong>Motorcycles</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Photography', '📷')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">📷</span> <strong>Photography</strong></div>
+    
+    <div class="section-header">🎨 Creative</div>
+    <div class="card" onclick="toggleInterest(this, 'Music', '🎵')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🎵</span> <strong>Music</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Art', '🎨')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🎨</span> <strong>Art</strong></div>
+    
+    <div class="section-header">🎬 Entertainment</div>
+    <div class="card" onclick="toggleInterest(this, 'Movies', '🎬')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">🎬</span> <strong>Movies & TV</strong></div>
+    <div class="card" onclick="toggleInterest(this, 'Fitness', '💪')" style="cursor: pointer; position: relative;"><span style="font-size: 24px;">💪</span> <strong>Fitness</strong></div>
+    
+    <button class="btn" id="interestsBtn" disabled onclick="show('home')">Continue</button>
+</div>
+
+<!-- Home Feed -->
+<div class="page" id="home">
+    <h2 style="margin-bottom: 20px;">Home Feed</h2>
+    
+    <div class="post-card">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF6B35, #6A4C93); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">SF</div>
+            <div>
+                <strong style="color: #334155;">@SportsFan_Mike</strong>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">🏈 Football • 2h ago</p>
+            </div>
+        </div>
+        <p style="margin: 10px 0;">Who else is hyped for Sunday's game?! Chiefs vs Bills is gonna be epic! 🔥</p>
+        <div style="display: flex; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+            <button class="like-btn" onclick="toggleLike(this)">❤️ <span>24</span></button>
+            <button class="like-btn">💬 <span>8</span></button>
+        </div>
+    </div>
+    
+    <div class="post-card">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #6A4C93, #FF6B35); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">CK</div>
+            <div>
+                <strong style="color: #334155;">@ChefKatie</strong>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">🍳 Cooking • 5h ago</p>
+            </div>
+        </div>
+        <p style="margin: 10px 0;">Just perfected my sourdough recipe! Happy to share tips with anyone trying to get started 🍞</p>
+        <div style="display: flex; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+            <button class="like-btn liked" onclick="toggleLike(this)">❤️ <span>156</span></button>
+            <button class="like-btn">💬 <span>42</span></button>
+        </div>
+    </div>
+    
+    <div class="post-card">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF6B35, #6A4C93); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">GG</div>
+            <div>
+                <strong style="color: #334155;">@GridironGuru</strong>
+                <p style="font-size: 12px; color: #94a3b8; margin: 0;">🎮 Video Games • 1d ago</p>
+            </div>
+        </div>
+        <p style="margin: 10px 0;">Looking for squadmates for ranked tonight. Need 2 more. Must have mic! 🎧</p>
+        <div style="display: flex; gap: 15px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+            <button class="like-btn" onclick="toggleLike(this)">❤️ <span>12</span></button>
+            <button class="like-btn">💬 <span>15</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- Browse Groups -->
+<div class="page" id="browse">
+    <h2>Browse Groups</h2>
+    <p>Find your community</p>
+    
+    <input type="text" class="input" placeholder="Search groups..." style="margin: 20px 0;">
+    
+    <div class="group-card" onclick="show('groupchat')">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <div>
+                <h3 style="color: #FF6B35; margin: 0;">🏈 Sunday Football Fans</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">247 members • Active now</p>
+            </div>
+            <span class="badge">Football</span>
+        </div>
+        <p style="font-size: 13px; margin: 0;">Talk strategy, celebrate TDs, and trash talk with fellow fans every Sunday!</p>
+    </div>
+    
+    <div class="group-card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <div>
+                <h3 style="color: #6A4C93; margin: 0;">🎮 PC Gaming Masters</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">1.2k members • Active now</p>
+            </div>
+            <span class="badge">Video Games</span>
+        </div>
+        <p style="font-size: 13px; margin: 0;">From FPS to RPGs - discuss builds, share clips, and find your squad.</p>
+    </div>
+    
+    <div class="group-card">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <div>
+                <h3 style="color: #FF6B35; margin: 0;">🍳 Home Cooking Heroes</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">892 members • Active 2h ago</p>
+            </div>
+            <span class="badge">Cooking</span>
+        </div>
+        <p style="font-size: 13px; margin: 0;">Share recipes, cooking tips, and food pics. From beginners to pros!</p>
+    </div>
+</div>
+
+<!-- Group Chat -->
+<div class="page" id="groupchat">
+    <div style="background: white; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #FF6B35;">🏈 Sunday Football Fans</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin: 5px 0 15px 0;">247 members • 23 online</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-small">📞 Call</button>
+            <button class="btn btn-small btn-secondary">💬 Text</button>
+            <button class="btn btn-small" style="flex: 1;">Join Group</button>
+        </div>
+    </div>
+    
+    <h3 style="margin-bottom: 15px;">Recent Messages</h3>
+    
+    <div class="message received">
+        <p style="font-weight: 600; font-size: 12px; margin-bottom: 5px; color: #6A4C93;">@SportsFan_Mike</p>
+        <p style="margin: 0; font-size: 14px;">Chiefs offense looking unstoppable this season! 🔥</p>
+        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">2 min ago</p>
+    </div>
+    
+    <div class="message sent">
+        <p style="margin: 0; font-size: 14px;">Anyone watching the game tonight?</p>
+        <p style="font-size: 11px; opacity: 0.8; margin-top: 5px;">Just now</p>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 30px;">
+        <input type="text" class="input" placeholder="Type a message..." style="flex: 1;">
+        <button class="btn" style="width: auto; padding: 16px 24px; margin: 0;">Send</button>
+    </div>
+</div>
+
+<!-- Profile -->
+<div class="page" id="profile">
+    <div style="text-align: center; margin: 20px 0;">
+        <div style="width: 100px; height: 100px; margin: 0 auto; background: linear-gradient(135deg, #FF6B35 0%, #6A4C93 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: bold; box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);">
+            <span id="profileInitial">U</span>
+        </div>
+        <h2 style="margin: 15px 0 5px 0;" id="profileName">User</h2>
+        <p style="color: #94a3b8;">Member since today</p>
+    </div>
+    
+    <h3 style="margin: 20px 0 10px 0;">My Interests</h3>
+    <div id="profileInterests"></div>
+    
+    <h3 style="margin: 20px 0 10px 0;">My Groups</h3>
+    <p style="font-size: 13px; color: #94a3b8; font-style: italic;">No groups yet</p>
+    
+    <h3 style="margin: 20px 0 10px 0;">Friends</h3>
+    <p style="font-size: 13px; color: #94a3b8; font-style: italic;">No friends yet</p>
+    
+    <button class="btn btn-secondary" style="margin-top: 30px;">Edit Profile</button>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="show('home')">
+        <div style="font-size: 24px;">🏠</div>
+        <div style="font-size: 11px; margin-top: 2px;">Home</div>
+    </div>
+    <div class="nav-item" onclick="show('browse')">
+        <div style="font-size: 24px;">🔍</div>
+        <div style="font-size: 11px; margin-top: 2px;">Groups</div>
+    </div>
+    <div class="nav-item" onclick="alert('Friends feature coming soon!')">
+        <div style="font-size: 24px;">👥</div>
+        <div style="font-size: 11px; margin-top: 2px;">Friends</div>
+    </div>
+    <div class="nav-item" onclick="show('profile')">
+        <div style="font-size: 24px;">👤</div>
+        <div style="font-size: 11px; margin-top: 2px;">Profile</div>
+    </div>
+</div>
+
+<script>
+var selectedInterests = [];
+var userName = 'User';
+
+function show(id) {
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active'); }
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(function(item) { item.classList.remove('active'); });
+    window.scrollTo(0, 0);
+    if (id === 'profile') updateProfile();
+}
+
+document.getElementById('nameInput').addEventListener('input', function() {
+    document.getElementById('nameBtn').disabled = !this.value.trim();
+});
+
+function saveName() {
+    userName = document.getElementById('nameInput').value.trim();
+    show('interests');
+}
+
+function toggleInterest(element, name, emoji) {
+    var interest = {name: name, emoji: emoji};
+    var index = -1;
+    for (var i = 0; i < selectedInterests.length; i++) {
+        if (selectedInterests[i].name === name) { index = i; break; }
+    }
+    if (index > -1) {
+        selectedInterests.splice(index, 1);
+        element.style.background = '';
+        var numEl = element.querySelector('.interest-number');
+        if (numEl) numEl.remove();
+    } else if (selectedInterests.length < 10) {
+        selectedInterests.push(interest);
+        element.style.background = 'linear-gradient(135deg, #FFE5DC 0%, #E6D5FF 100%)';
+        var numberSpan = document.createElement('span');
+        numberSpan.className = 'interest-number';
+        numberSpan.style.cssText = 'position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #FF6B35 0%, #6A4C93 100%); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;';
+        numberSpan.innerText = selectedInterests.length;
+        element.style.position = 'relative';
+        element.appendChild(numberSpan);
+    }
+    updateSelectedDisplay();
+}
+
+function updateSelectedDisplay() {
+    document.getElementById('count').innerText = selectedInterests.length + ' / 10 selected';
+    document.getElementById('interestsBtn').disabled = selectedInterests.length === 0;
+}
+
+function updateProfile() {
+    document.getElementById('profileName').innerText = userName || 'User';
+    document.getElementById('profileInitial').innerText = (userName || 'U').charAt(0).toUpperCase();
+    
+    var html = '';
+    for (var i = 0; i < selectedInterests.length; i++) {
+        html += '<span class="badge">' + selectedInterests[i].emoji + ' ' + selectedInterests[i].name + '</span>';
+    }
+    document.getElementById('profileInterests').innerHTML = html || '<p style="font-size: 13px; color: #94a3b8; font-style: italic;">No interests selected</p>';
+}
+
+function toggleLike(btn) {
+    btn.classList.toggle('liked');
+    var count = parseInt(btn.querySelector('span').innerText);
+    btn.querySelector('span').innerText = btn.classList.contains('liked') ? count + 1 : count - 1;
+}
+</script>
+
+</body>
+</html>
